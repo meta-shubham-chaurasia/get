@@ -105,7 +105,7 @@ class HexCalculator1 extends Hex
 				if (Hexa1 == null || Hexa1.trim().isEmpty()) {
 			         System.out.println("Incorrect format of string");
 			     }
-			     Pattern p = Pattern.compile("[^A-Za-z0-9]");
+			     Pattern p = Pattern.compile("[^A-Fa-f0-9]");
 			     Matcher m1 = p.matcher(Hexa1);
 			     boolean b1 = m1.find();
 			     if(b1){
