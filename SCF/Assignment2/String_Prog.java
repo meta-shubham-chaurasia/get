@@ -56,17 +56,21 @@ public class String_Prog {
 			else if(str1[i]>=65&&str1[i]<=90)
 				str1[i]=(char)(str1[i]+32);
 		}
-		String CaseChange=str1.toString();
+		String CaseChange="";
+		for(int i=0;i<str1.length;i++)
+		{
+			CaseChange+=str1[i];
+		}
 		return CaseChange;
 	}
 
 	public static void main(String[] args) throws IOException{
 		BufferedReader br =new BufferedReader(new InputStreamReader(System.in)); 
 		for(int i=1;i>0;i++){
-			System.out.println("Enter 1 to Compare\nEnter 2 to reverse\nEnter 3 to Change Case\nEnter 4 to Find Largest Word\nEnter 5 to exit ");
+			System.out.println("Enter 1 to Compare\nEnter 2 to reverse\nEnter 3 to Change Case\nEnter 4 to exit ");
 			try{
 				int choi=Integer.parseInt(br.readLine());
-				if(choi>5){
+				if(choi>4){
 					System.out.println("Invalid Choice");
 				}
 				else{
@@ -88,9 +92,7 @@ public class String_Prog {
 							String str_case=br.readLine();
 							System.out.println(String_ChangeCase(str_case));
 						break;
-						case 4:
-						break;
-						case 5:i=-1;
+						case 4:i=-1;
 						break;
 						default:
 							System.out.println("Invalid Choice");

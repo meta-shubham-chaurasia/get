@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class MarkSheet {
+class MarkSheet1 {
 
 	/**
 	 * Calculating average of grades of students
@@ -93,64 +93,74 @@ public class MarkSheet {
 	
 }
 
-class Driver2
+class MarkSheet
 {
 	public static void main(String args[])throws IOException
 	{
 		int choice;
-		MarkSheet op=new MarkSheet();
+		MarkSheet1 op=new MarkSheet1();
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		System.out.println("Enter the number of students");
-		int students=Integer.parseInt(br.readLine());
-
-		int[] grades=new int[students];
-		for(int i=0;i<students;i++)
-		{
-			System.out.println("Enter the grade");
-			grades[i]=Integer.parseInt(br.readLine());
-		}
-		for(int i=1;i>0;i++)
-		{
-			System.out.println("Enter 1 to perform average of all grades,2 for maximum grade,3 for minimum grade,4 for percentage of students passed,5 to stop");
-
-			choice=Integer.parseInt(br.readLine());
-			switch(choice)
-			{
-				case 1:try{
-					double avg=op.Average(grades,students);
-					System.out.println("The average is :"+avg+"\n");	
+		int z=0;
+		l1:
+		while(z>-1){
+			System.out.println("Enter the number of students");
+			try{
+				int students=Integer.parseInt(br.readLine());
+		
+				int[] grades=new int[students];
+				for(int i=0;i<students;i++)
+				{
+					System.out.println("Enter the grade");
+					grades[i]=Integer.parseInt(br.readLine());
 				}
-				catch(ArithmeticException e){
-					System.out.println("invalid");
+				for(int i=1;i>0;i++)
+				{
+					System.out.println("Enter 1 to perform average of all grades,2 for maximum grade,3 for minimum grade,4 for percentage of students passed,5 to stop");
+		
+					choice=Integer.parseInt(br.readLine());
+					switch(choice)
+					{
+						case 1:try{
+							double avg=op.Average(grades,students);
+							System.out.println("The average is :"+avg+"\n");	
+						}
+						catch(ArithmeticException e){
+							System.out.println("invalid");
+						}
+							break;
+						case 2:try{
+							int max=op.MaximumGrade(grades,students);
+							System.out.println("The maximum grade is :"+max+"\n");
+						}
+						catch(ArithmeticException e){
+							System.out.println("invalid");
+						}
+							break;	
+						case 3:try{
+							int min=op.MinimumGrade(grades,students);
+							System.out.println("The minimum grade is :"+min+"\n");
+						}
+						catch(ArithmeticException e){
+							System.out.println("invalid");
+						}
+							break;	
+						case 4:try{
+							double percentagePassed=op.MaximumGrade(grades,students);
+							System.out.println("The percentage of students who passed is :"+percentagePassed+"\n");	
+						}
+						catch(ArithmeticException e){
+							System.out.println("invalid");
+						}
+							break;
+						case 5:i=-1;
+							break;
+						default:System.out.println("INVALID CHOICE");	
+					}
 				}
-					break;
-				case 2:try{
-					int max=op.MaximumGrade(grades,students);
-					System.out.println("The maximum grade is :"+max+"\n");
-				}
-				catch(ArithmeticException e){
-					System.out.println("invalid");
-				}
-					break;	
-				case 3:try{
-					int min=op.MinimumGrade(grades,students);
-					System.out.println("The minimum grade is :"+min+"\n");
-				}
-				catch(ArithmeticException e){
-					System.out.println("invalid");
-				}
-					break;	
-				case 4:try{
-					double percentagePassed=op.MaximumGrade(grades,students);
-					System.out.println("The percentage of students who passed is :"+percentagePassed+"\n");	
-				}
-				catch(ArithmeticException e){
-					System.out.println("invalid");
-				}
-					break;
-				case 5:i=-1;
-					break;
-				default:System.out.println("INVALID CHOICE");	
+			}
+			catch(Exception e){
+				System.out.println("Invalid");
+				continue l1;
 			}
 		}
 	}
