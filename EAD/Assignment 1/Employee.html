@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Metacube Parking System</title>
+    <link rel="stylesheet" href="style2.css">
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script>
+        let id, user, x, ide;
+
+        function employeeValidate() {
+
+            var empName = document.getElementById('empName').value;
+            var empGender = document.getElementById('gender').value;
+            var empEmail = document.getElementById('2').value;
+            var empPass = document.getElementById('pass').value;
+            var empPass2 = document.getElementById('pass2').value;
+            var empNo = document.getElementById('4').value;
+            user = empName;
+            var mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+            
+            var patt1 = /[0-9]/g;
+            var result = empName.match(patt1);
+
+            var atPos = empEmail.indexOf("@");
+            var dotPos = empEmail.lastIndexOf(".");
+
+            if (empName == null || empName == "") {
+                alert("name cant be blank");
+                return false;
+            } else if (empName.length < 2) {
+                alert("name must be min of 2 letters");
+                return false;
+            } else if (result != null) {
+                alert("no numbers");
+                return false;
+            } else if(!empEmail.match(mailformat)){
+                //document.form1.text1.focus();
+                alert("Invalid email");
+                return false;
+            } else if (empPass == null || empPass == "") {
+                alert("password cant be blank");
+                return false;
+            } else if (empPass.length < 8) {
+                alert("password must be atleast 8 characters long");
+                return false;
+            } else if (empPass != empPass2) {
+                alert("passwords must be same");
+                return false;
+            } else if (isNaN(empNo)) {
+                alert("contact number must contains numbers");
+                return false;
+            } else if (empNo == null || empNo == "") {
+                alert("contact no cant be blank");
+                return false;
+            } else if (empNo.length < 8) {
+                alert("contact number must be of min 8 numbers");
+                return false;
+            } else if (atPos < 1 || dotPos < atPos + 2 || dotPos + 2 >= empEmail.length) {
+                alert("Please enter valid email address");
+                return false;
+            } else {
+                return true;
+            }
+
+        }
+
+        function vehicleValidate() {
+
+            var vehicleName = document.getElementById('vehicleName').value;
+            var vehicleNo = document.getElementById('vehicleNumber').value;
+            var empID = document.getElementById('empId').value;
+
+            var pattern = /[0-9]/g;
+            var result = vehicleName.match(pattern);
+
+            if (vehicleName == null || vehicleName == "") {
+                alert("name cant be blank");
+                return false;
+            } else if (result != null) {
+                alert("no numbers for vehicle name");
+                return false;
+            } else if (vehicleNo == null || vehicleNo == "") {
+                alert("vehicle number cant be blank");
+                return false;
+            } else if (empID == null || empID == "") {
+                alert("employee id cant be blank");
+                return false;
+            } else {
+                return true;
+            }
+
+        }
+
+        function employeeRegister() {
+
+            if (employeeValidate() == true) {
+                console.log("aa");
+                document.getElementById('empRegisterationForm').style.display = 'none';
+                swal("1st step completed", {
+                    icon: "success",
+                });
+                document.getElementById('addVehicleForm').style.visibility = 'visible';
+            }
+
+        }
+
+        function changeCurrent(clicked) {
+            ide = clicked;
+        }
+
+        function vehicleRegister() {
+
+            if (vehicleValidate() == true) {
+                var name = ide.value;
+                document.getElementById('empRegisterationForm').style.display = 'none';
+                document.getElementById('addVehicleForm').style.display = 'none';
+                swal("2nd step completed", {
+                    icon: "success",
+                });
+                if (name == 'cycle') {
+                    document.getElementById('cycleTable').style.visibility = 'visible';
+                } else if (name == 'bike') {
+                    document.getElementById('bikeTable').style.visibility = 'visible';
+                }
+            }
+
+        }
+
+        function ten(clicked) {
+            document.getElementById('cycleTable').style.visibility = 'hidden';
+            document.getElementById('bikeTable').style.visibility = 'hidden';
+            document.getElementById('currency').style.visibility = 'visible';
+            id = clicked;
+        }
+
+        function currency(value2) {
+
+            document.getElementById('currency').style.visibility = 'hidden';
+            var va = document.getElementById(id).value;
+            if (value2.value == 'usd') {
+                var val = va * 0.013;
+                if (ide.value == 'cycle') {
+                    document.getElementById('cycleTable').style.visibility = 'visible';
+                    document.getElementById('cycleTable').innerHTML = "<h1>Hey " + user + " ! you are registered now.your cost is :" + val + "! </h1>";
+                } else if (ide.value == 'bike') {
+                    document.getElementById('bikeTable').style.visibility = 'visible';
+                    document.getElementById('bikeTable').innerHTML = "<h1>Hey " + user + " ! you are registered now.your cost is :" + val + "! </h1>";
+                }
+                console.log(val);
+            } else if (value2.value == 'yen') {
+                var val = va * 1.54;
+                if (ide.value == 'cycle') {
+                    document.getElementById('cycleTable').style.visibility = 'visible';
+                    document.getElementById('cycleTable').innerHTML = "<h1>Hey " + user + " ! you are registered now.your cost is :" + val + "! </h1>";
+                } else if (ide.value == 'bike') {
+                    document.getElementById('bikeTable').style.visibility = 'visible';
+                    document.getElementById('bikeTable').innerHTML = "<h1>Hey " + user + " ! you are registered now.your cost is :" + val + "! </h1>";
+                }
+                console.log(val);
+            }
+        }
+    </script>
+</head>
+
+<body>
+
+    <form id="empRegisterationForm">
+        <h2>Employee Registeration Form</h2>
+        <label> <input id="empName" type="text" placeholder="Name" required /><br/></label>
+        <label><input type="radio" id ="gender"name="gender" required/>Male<br/></label>
+        <label><input type="radio"  name="gender" required/>Female<br/></label>
+        <label><input type="email" id="2" placeholder="Email" name="email"required/><br/></label>
+        <label><input type="password" id="pass" placeholder="Password" required /><br/></label>
+        <label><input type="password" id ="pass2" placeholder="Password" required /><br/></label>
+        <label><input type="text" id="4" placeholder="Contact Number" required/><br/></label>
+        <label><input type="button" id="1" value="Submit" onclick="employeeRegister()" /></label>
+    </form>
+
+    <form id="addVehicleForm">
+        <h2>Vehicle Registration Form</h2>
+        <label> <input id="vehicleName" type="text" placeholder="Vehicle Name" required /><br/></label>
+        <label><select id="7" onchange="changeCurrent(this);">Select Vehicle Type
+            <option value="none" selected disabled hidden>Select Vehicle Type</option>
+            <option value="cycle" id="cycle">cycle</option>
+            <option value="bike" id="bike">bike</option>
+            </select><br/><br/><br/></label>
+        <label> <input id="vehicleNumber" type="text" placeholder="Vehicle Number" required /><br/></label>
+        <label><input id="empId" type="text" placeholder="Employee Id" required /><br/></label>
+        <label> <textarea placeholder="Identification" required></textarea><br/><br/></label>
+        <label> <input type="button" value="Submit" onclick="vehicleRegister()" /></label>
+    </form>
+
+    <table id=cycleTable>
+        <tr>
+            <th>Daily</th>
+            <th>Monthly</th>
+            <th>Yearly</th>
+        </tr>
+        <tr>
+            <td>Rs.5 <label> <input type="button" id="ten" value=5 onclick="ten(this.id)" /></label></td>
+            <td>Rs.100 <label> <input type="button" id="threeHundred" value=100 id ="threeHundred" onclick="ten(this.id)" /></label></td>
+            <td>Rs.500 <label> <input type="button"  id="twelveHundred" value=500 id="twelveHundred" onclick="ten(this.id)" /></label></td>
+        </tr>
+    </table>
+
+    <table id=bikeTable>
+        <tr>
+            <th>Daily</th>
+            <th>Monthly</th>
+            <th>Yearly</th>
+        </tr>
+        <tr>
+            <td>Rs.10<label> <input type="button" id="tena" value=10 onclick="ten(this.id)" /></label></td>
+            <td>Rs.200 <label> <input type="button" id="threeHundreda" value=200  onclick="ten(this.id)" /></label></td>
+            <td>Rs.1000 <label> <input type="button"  id="twelveHundreda" value=1000 onclick="ten(this.id)" /></label></td>
+        </tr>
+    </table>
+
+    <div name="currency" id="currency">
+        <select id="currMenu" name="currMenu" onchange="currency(this);">Select currency
+            <option value="none" selected disabled hidden>Select currency</option>
+        <option value="yen" id="yen">yen</option>
+        <option value="usd" id="usd">usd</option>
+       </select>
+    </div>
+
+</body>
+
+</html>
