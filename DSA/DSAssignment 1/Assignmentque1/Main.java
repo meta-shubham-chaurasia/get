@@ -56,20 +56,20 @@ public class Main {
 	 * @return
 	 */
 	public static LinkedList insertNode(Scanner scanner) {
-		int entry, count = 1;
+		int entry, counter = 1;
 		LinkedList llist = new LinkedList();
 
-		System.out.println("Enter " + " node value " + count);
+		System.out.println("Enter " + " node value " + counter);
 		llist.head = new LinkedList.Node(scanner.nextInt());
 		do {
 			try {
-				System.out.println("Enter " + " node value " + (count + 1));
+				System.out.println("Enter " + " node value " + (counter + 1));
 				System.out.println("....Enter 911 to terminate linked list");
 				entry = scanner.nextInt();
 				if (entry == 911)
 					break;
 				llist.append(entry);
-				count++;
+				counter++;
 			} catch (InputMismatchException e) {
 				System.out.println("Enter integer only!");
 				entry = -1;
@@ -98,8 +98,8 @@ public class Main {
 					System.out.println("Enter right index of linked list(starting from 1)");
 					int rIndex = scanner.nextInt();
 					System.out.println("Enter N, no.of rotations for the subList");
-					int N = scanner.nextInt();
-					llistRef.rotateSubList(lIndex, rIndex, N);
+					int noOfRotations = scanner.nextInt();
+					llistRef.rotateSubList(lIndex, rIndex, noOfRotations);
 					break;
 				}
 				catch (InputMismatchException e) {

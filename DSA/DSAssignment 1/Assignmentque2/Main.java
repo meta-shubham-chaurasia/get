@@ -11,7 +11,7 @@ import que1.LinkedList;
  */
 public class Main {
 	public static void main(String[] args) {
-		Scanner sc = new Scanner(System.in);
+		Scanner scanner = new Scanner(System.in);
 
 		LinkedList llistRef = null;
 		int choice = 0;
@@ -19,7 +19,7 @@ public class Main {
 			printInstructions();
 			System.out.println("Enter your choice: ");
 			try {
-				choice = sc.nextInt();
+				choice = scanner.nextInt();
 
 				switch (choice) {
 				case 1:
@@ -43,7 +43,7 @@ public class Main {
 			} catch (InputMismatchException e) {
 				System.out.println("Enter integer only!");
 				choice = -1;
-				sc.nextLine();
+				scanner.nextLine();
 			}
 
 		} while (choice != 3);
