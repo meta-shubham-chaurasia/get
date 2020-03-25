@@ -116,10 +116,10 @@ public class LinkedList {
 	 * @return Integer Array of list data
 	 */
 	public int[] convertListToArray(LinkedList list) {
-		int arr[] = new int[list.size()];
+		int array[] = new int[list.size()];
 		Node tempHead = list.head;
-		for (int i = 0; i < arr.length; i++) {
-			arr[i] = tempHead.data;
+		for (int i = 0; i < array.length; i++) {
+			array[i] = tempHead.data;
 			tempHead = tempHead.next;
 		}
 		return arr;
@@ -131,13 +131,13 @@ public class LinkedList {
 	 * @return An integer value, Return the size of Linked List.
 	 */
 	public int size() {
-		int count = 0;
+		int counter = 0;
 		Node node = head;
 		while (node != null) {
 			node = node.next;
-			count++;
+			counter++;
 		}
-		return count;
+		return counter;
 	}
 
 }

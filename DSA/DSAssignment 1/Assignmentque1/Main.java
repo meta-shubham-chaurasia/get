@@ -9,23 +9,23 @@ import java.util.Scanner;
 public class Main {
 	public static void main(String[] args) {
 
-		Scanner sc = new Scanner(System.in);
+		Scanner scanner = new Scanner(System.in);
 		LinkedList llistRef = null;
 		int choice = 0;
 		do {
 			printInstructions();
 			System.out.println("Enter your choice: ");
 			try {
-				choice = sc.nextInt();
+				choice = scanner.nextInt();
 
 				switch (choice) {
 				case 1:
 					System.out.println("Insert node... ");
-					llistRef = insertNode(sc);
+					llistRef = insertNode(scanner);
 					break;
 				case 2:
 					System.out.println("Rotate subList... ");
-					subList(llistRef, sc);
+					subList(llistRef, scanner);
 					break;
 				case 3:
 					llistRef.printList();
@@ -34,7 +34,7 @@ public class Main {
 			} catch (InputMismatchException e) {
 				System.out.println("Enter integer only!");
 				choice = -1;
-				sc.nextLine();
+				scanner.nextLine();
 			}
 
 		} while (choice != 5);
@@ -52,20 +52,20 @@ public class Main {
 	/**
 	 * The function creates a link list by inserting nodes
 	 * 
-	 * @param sc
+	 * @param scanner
 	 * @return
 	 */
-	public static LinkedList insertNode(Scanner sc) {
+	public static LinkedList insertNode(Scanner scanner) {
 		int entry, count = 1;
 		LinkedList llist = new LinkedList();
 
 		System.out.println("Enter " + " node value " + count);
-		llist.head = new LinkedList.Node(sc.nextInt());
+		llist.head = new LinkedList.Node(scanner.nextInt());
 		do {
 			try {
 				System.out.println("Enter " + " node value " + (count + 1));
 				System.out.println("....Enter 911 to terminate linked list");
-				entry = sc.nextInt();
+				entry = scanner.nextInt();
 				if (entry == 911)
 					break;
 				llist.append(entry);
@@ -73,7 +73,7 @@ public class Main {
 			} catch (InputMismatchException e) {
 				System.out.println("Enter integer only!");
 				entry = -1;
-				sc.nextLine();
+				scanner.nextLine();
 			}
 
 		} while (entry != -2);
@@ -87,24 +87,24 @@ public class Main {
 	 * 
 	 * @param llistRef
 	 *            is a object reference to LinkedList type
-	 * @param sc
+	 * @param scanner
 	 *            Scanner object
 	 */
-	public static void subList(LinkedList llistRef, Scanner sc) {
+	public static void subList(LinkedList llistRef, Scanner scanner) {
 		do {
 			try {
 					System.out.println("Enter left index of linked list(starting from 1)");
-					int lIndex = sc.nextInt();
+					int lIndex = scanner.nextInt();
 					System.out.println("Enter right index of linked list(starting from 1)");
-					int rIndex = sc.nextInt();
+					int rIndex = scanner.nextInt();
 					System.out.println("Enter N, no.of rotations for the subList");
-					int N = sc.nextInt();
+					int N = scanner.nextInt();
 					llistRef.rotateSubList(lIndex, rIndex, N);
 					break;
 				}
 				catch (InputMismatchException e) {
 				System.out.println("Enter integer only!");
-				sc.nextLine();
+				scanner.nextLine();
 			}
 		} while (true);
 
