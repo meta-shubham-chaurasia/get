@@ -11,30 +11,30 @@ import stack.StackImplementation;
  *
  */
 public class ExpressionEvaluation {
-	private static Map<String, Integer> PRECEDENCE = new HashMap<String, Integer>();
+	private static Map<String, Integer> precedenceMap = new HashMap<String, Integer>();
 
 	/**
 	 * Storing precedence values of all operators
 	 */
 	static {
-		PRECEDENCE.put("!", 1);
+		precedenceMap.put("!", 1);
 
-		PRECEDENCE.put("*", 2);
-		PRECEDENCE.put("/", 2);
+		precedenceMap.put("*", 2);
+		precedenceMap.put("/", 2);
 
-		PRECEDENCE.put("+", 3);
-		PRECEDENCE.put("-", 3);
+		precedenceMap.put("+", 3);
+		precedenceMap.put("-", 3);
 
-		PRECEDENCE.put("<", 4);
-		PRECEDENCE.put("<=", 4);
-		PRECEDENCE.put(">", 4);
-		PRECEDENCE.put(">=", 4);
+		precedenceMap.put("<", 4);
+		precedenceMap.put("<=", 4);
+		precedenceMap.put(">", 4);
+		precedenceMap.put(">=", 4);
 
-		PRECEDENCE.put("==", 5);
-		PRECEDENCE.put("!=", 5);
+		precedenceMap.put("==", 5);
+		precedenceMap.put("!=", 5);
 
-		PRECEDENCE.put("&&", 6);
-		PRECEDENCE.put("||", 6);
+		precedenceMap.put("&&", 6);
+		precedenceMap.put("||", 6);
 	}
 
 	/**
@@ -43,7 +43,7 @@ public class ExpressionEvaluation {
 	 * @return true if it is an operator or false otherwise
 	 */
 	private static boolean isOperator(String operator) {
-		return PRECEDENCE.containsKey(operator);
+		return precedenceMap.containsKey(operator);
 	}
 
 	/**
@@ -169,7 +169,7 @@ public class ExpressionEvaluation {
 			} else if (isOperator(token)) {
 				while (!operators.isEmpty()
 						&& !"(".equals(operators.top())
-						&& PRECEDENCE.get(operators.top()) <= PRECEDENCE
+						&& precedenceMap.get(operators.top()) <= precedenceMap
 								.get(token)) {
 					evaluateTopOperator(values, operators);
 				}

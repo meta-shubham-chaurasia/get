@@ -10,13 +10,13 @@ import jxl.write.Label;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 
-/**
+/**studentsQueue
  * Class to implement the Counsellor
  *
  */
 public class Counsellor {
-	private Map<String, Program> programs;
-	private StudentQueue students;
+	private Map<String, Program> programsMap;
+	private StudentQueue studentsQueue ;
 	
 	/**
 	 * Constructor to initialise programs (a Map from program name to Program)
@@ -24,7 +24,7 @@ public class Counsellor {
 	 * @throws Exception
 	 */
 	public Counsellor() throws Exception {
-		programs = new HashMap<String, Program>();
+		programsMap = new HashMap<String, Program>();
 		fetchPrograms("files/Program.xls");
 		fetchStudents("files/Student.xls");
 	}
@@ -47,7 +47,7 @@ public class Counsellor {
 		for(int i=0;i<programSheetLength;i++){
 			String programName = programSheet.getCell(0,i).getContents();
 			int availableSeats = Integer.parseInt(programSheet.getCell(1,i).getContents());
-			programs.put(programName, new Program(programName, availableSeats));
+			programsMap.put(programName, new Program(programName, availableSeats));
 		}
 		programWorkbook.close();
 	}
@@ -67,7 +67,7 @@ public class Counsellor {
 		}
 		Sheet studentSheet = studentWorkbook.getSheet(0);
 		int studentSheetLength = studentSheet.getRows();
-		students = new StudentQueue(studentSheetLength);
+		studentsQueue = new StudentQueue(studentSheetLength);
 		for(int i=0;i<studentSheetLength;i++){
 			String studentName = studentSheet.getCell(0, i).getContents();
 			String[] preference = new String[5];
@@ -75,7 +75,7 @@ public class Counsellor {
 			for(int j=1;j<=5;j++){
 				preference[j-1] = studentSheet.getCell(j ,i).getContents();
 			}
-			students.enQueue(new Student(studentName, preference));
+			studentsQueue.enQueue(new Student(studentName, preference));
 		}
 		studentWorkbook.close();
 	}
@@ -88,16 +88,16 @@ public class Counsellor {
 		WritableWorkbook allocationWorkbook = Workbook.createWorkbook(new File("files/Allocation.xls"));
 		WritableSheet allocationSheet = allocationWorkbook.createSheet("Allocation", 0);
 		int index = 0;
-		while(!students.isEmpty()) {
-			Student student = students.deQueue();
+		while(!studentsQueue.isEmpty()) {
+			Student student = studentsQueue.deQueue();
 
 			for(String preference: student.getProgramPreference()){
-				if(programs.get(preference) == null){
+				if(programsMap.get(preference) == null){
 					throw new Exception("Invalid Preference Found!");
 				}
-				if(programs.get(preference).isSeatAvailable()){
+				if(programsMap.get(preference).isSeatAvailable()){
 					student.setAllocatedProgram(preference);
-					programs.get(preference).occupySeat();
+					programsMap.get(preference).occupySeat();
 					break;
 				}
 			}
