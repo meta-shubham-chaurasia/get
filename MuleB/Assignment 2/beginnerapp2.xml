@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="371eff5c-321c-4567-a7e8-56076da833c0">
+		<http:request-connection host="localhost" port="8083" />
+	</http:request-config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="e946e4a2-97f5-406e-ac2a-de7481ed23d7" >
+		<http:listener-connection host="localhost" port="8083" />
+	</http:listener-config>
+	<flow name="beginnerapp2Flow" doc:id="b76f1f59-f089-4fae-9624-25fbfaecb129" >
+		<http:listener doc:name="Listener" doc:id="5687aa80-3aeb-4e30-93f2-011ae43fc66f" config-ref="HTTP_Listener_config" path="/metacube/api/{name}"/>
+		<logger level="INFO" doc:name="Logger" doc:id="b16125b3-5880-4fa0-a5e4-4424781c9c5e" message="#[attributes.uriParams.name]"/>
+		<set-payload value="#['Hello ' ++ attributes.uriParams.name]" doc:name="Set Payload" doc:id="0b8ff355-79d2-4877-8fbb-fcd1c1364935" />
+	</flow>
+</mule>
