@@ -17,29 +17,31 @@ http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/fil
 		<file:connection workingDir="C:\Users\Shubham\AnypointStudio\studio-workspace\beginnerapp3" />
 	</file:config>
 	<flow name="beginnerapp3Flow" doc:id="81c63760-031a-4545-96ba-9e9ba355b912" >
-		<http:listener doc:name="Listener" doc:id="808b7c04-29d2-456b-b968-41afd8884251" config-ref="HTTP_Listener_config" path="/accounts" allowedMethods="POST"/>
-		<ee:transform doc:name="Transform Message" doc:id="76493950-c6ad-40be-9277-20d181e2ca28">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
+		<http:listener doc:name="Listener" doc:id="808b7c04-29d2-456b-b968-41afd8884251" config-ref="HTTP_Listener_config" path="/accounts/{name}" allowedMethods="POST"/>
+		<set-variable value="#[attributes.uriParams.name]" doc:name="Set Variable" doc:id="4fb148d0-29dd-4d2e-a320-5fa214711a14" variableName="name"/>
+		<set-variable value="#[attributes.queryParams.number]" doc:name="Set Variable" doc:id="2a71d16b-4bd5-4f2f-a279-9520c40ebf1e" variableName="phone"/>
+		<set-payload value="#[%dw 2.0
 output application/java
 ---
-payload map (items,index) ->
-{
-	Name:items.Name,
-	Phone:items.Phone
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
+[{
+
+  Name: vars.name,
+  Phone: vars.phone
+}]]" doc:name="payload" doc:id="c47286b4-0c92-467a-9f29-5bfb8742dd4e" />
 		<salesforce:create doc:name="Create" doc:id="d182a7e8-e8db-438c-b8a1-4530ed6308ef" config-ref="Salesforce_Config" type="Account" />
 		<ee:transform doc:name="Transform Message" doc:id="75824248-b94c-42d4-b484-49d9ff23bb1b">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
-output application/json
+output application/csv headerLineNumber = 0 , header = true
 ---
-payload]]></ee:set-payload>
+payload map (item,index)->{
+	id:item.id,
+	name:vars.name
+}]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<file:write doc:name="Write" doc:id="64fb036a-c22e-41fe-b5e5-bf988510da3f" config-ref="File_Config" path="C:\Users\Shubham\AnypointStudio\studio-workspace\beginnerapp3\output\tmp.csv" />
+		<set-payload value="#[payload]" doc:name="Final Payload" doc:id="b019553f-91a0-4aa1-96df-8f26581102e1" />
 		<logger level="INFO" doc:name="Logger" doc:id="173697c7-59e1-417f-9226-a9504f65b775" message="#[payload]"/>
 	</flow>
 </mule>
