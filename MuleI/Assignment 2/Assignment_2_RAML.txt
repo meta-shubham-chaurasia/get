@@ -1,0 +1,40 @@
+#%RAML 1.0
+baseUri: https://anypoint.mulesoft.com/mocking/api/v1/links/ad156e74-facc-4c28-83ca-89691bdbc33f/ # 
+title: Intermediate_A2_API
+description: This is API to manage customer data
+version: 1.0
+/customer:
+  get:
+    description: To get Customer Details based on ID
+    queryParameters:
+      id:
+        required: true
+        example: "123"
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              {
+                "First_Name":"Ex1",
+                "Last_Name":"Ex2"
+              }
+      404:
+        body:
+          application/json:
+            example:
+              "The Resource you are looking is Not Found"
+      500:
+        body:
+          application/json:
+            example:
+              "Internal Server Error"
+  post:
+    displayName: Stores Customer Details in System
+    body:
+      application/json:
+        example:
+          {
+                "First_Name":"In1",
+                "Last_Name":"In2"
+          }
