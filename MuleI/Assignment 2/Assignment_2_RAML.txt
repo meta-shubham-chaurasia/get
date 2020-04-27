@@ -1,5 +1,5 @@
 #%RAML 1.0
-baseUri: https://anypoint.mulesoft.com/mocking/api/v1/links/ad156e74-facc-4c28-83ca-89691bdbc33f/ # 
+baseUri: https://anypoint.mulesoft.com/mocking/api/v1/links/57dcb038-881f-4c96-976f-ec258d0656d2/ # 
 title: Intermediate_A2_API
 description: This is API to manage customer data
 version: 1.0
@@ -8,7 +8,7 @@ version: 1.0
     description: To get Customer Details based on ID
     queryParameters:
       id:
-        required: true
+        required: false
         example: "123"
     responses:
       200:
@@ -31,10 +31,22 @@ version: 1.0
               "Internal Server Error"
   post:
     displayName: Stores Customer Details in System
-    body:
-      application/json:
-        example:
-          {
-                "First_Name":"In1",
-                "Last_Name":"In2"
-          }
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              {
+                "First_Name":"Ex1",
+                "Last_Name":"Ex2"
+              }
+      404:
+        body:
+          application/json:
+            example:
+              "Not Found"
+      500:
+        body:
+          application/json:
+            example:
+              "Internal Server Error"
