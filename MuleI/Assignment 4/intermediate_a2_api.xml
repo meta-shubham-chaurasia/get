@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+    <http:listener-config name="intermediate_a2_api-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+    <apikit:config name="intermediate_a2_api-config" api="intermediate_a2_api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="cd01f554-15a7-468d-a4a2-ac8ac553d144" >
+		<salesforce:cached-basic-connection username="shubham.chaurasia@metacube.com" password="1234@abcd" securityToken="w6WVKSaepLiBCfTMfZFWEqJR" />
+	</salesforce:sfdc-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="97713286-0d50-4c5b-ad8a-ead86df8dadd" >
+		<file:connection workingDir="C:\Users\Shubham\AnypointStudio\studio-workspace\testscript\src\main\output" />
+	</file:config>
+	<file:config name="File_Config1" doc:name="File Config" doc:id="1068de83-def4-489a-a4d0-b0af8e298963" >
+		<file:connection workingDir="C:\Users\Shubham\AnypointStudio\studio-workspace\testscript\src\main\output" />
+	</file:config>
+	<flow name="intermediate_a2_api-main">
+        <http:listener config-ref="intermediate_a2_api-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="intermediate_a2_api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="intermediate_a2_api-console">
+        <http:listener config-ref="intermediate_a2_api-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="intermediate_a2_api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="get:\customer:intermediate_a2_api-config">
+    	<salesforce:query doc:name="Query" doc:id="3a9ee9e4-d9ad-42f2-ba9c-eed2b4bd7adf" config-ref="Salesforce_Config">
+				<salesforce:salesforce-query>Select Name, Email__c, Phone from Account</salesforce:salesforce-query>
+			</salesforce:query>
+		<ee:transform doc:name="Transform Message" doc:id="7302e2e7-b34b-481e-8f83-f74aeeb85439">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="57e03bd1-7252-478c-acc5-22a68ad55c73" >
+			<set-variable value="#[payload.Name]" doc:name="Set Variable" doc:id="53cd169a-4e4a-433b-8b14-e77f2ade3ff5" variableName="Name"/>
+			<logger level="INFO" doc:name="Logger" doc:id="1ca1a6e7-04c9-4025-bec5-824f25289793" message="#[payload]" />
+			<file:write doc:name="Write" doc:id="c5223a05-29db-4153-aeff-9e547b6b5e35" config-ref="File_Config1" path='#[vars.Name ++ ".json"]'/>
+		</foreach>
+    </flow>
+    <flow name="post:\customer:application\json:intermediate_a2_api-config">
+    <file:list doc:name="List" doc:id="6899b6b6-908d-4fd3-aa05-b3cd3f169cdd" config-ref="File_Config" directoryPath="C:\Users\Shubham\AnypointStudio\studio-workspace\testscript\src\main\output" />
+		<ee:transform doc:name="Transform Message" doc:id="07b33b18-072a-4d1a-a67a-c79d5360a7ac" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map(items,index)->{
+	Name:items.payload.Name,
+	Email__c:items.payload.Email__c
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="38619b1e-236e-4e90-b4cb-ed34c0a5c568" >
+			<logger level="INFO" doc:name="Logger" doc:id="501ccee7-b3f7-49b0-8737-43a41e131efe" message="#[payload]"/>
+			<set-variable value="#[payload.Name]" doc:name="Set Variable" doc:id="d9227a96-9d45-4d9c-81b1-8fc222a70372" variableName="Name"/>
+			<choice doc:name="Choice" doc:id="173ea78a-1617-4d14-b008-2a3902c534eb" >
+				<when expression='#[vars.Name startsWith "A"]'>
+					<ee:transform doc:name="Transform Message" doc:id="6b07c508-7f44-489e-9f9f-b45c250a69ae">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	Name:payload.Name ++"1",
+	Email__c:payload.Email__c
+}	
+]
+]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<logger level="INFO" doc:name="Logger" doc:id="6b2d7de5-ed71-4d80-b37e-9863167076f5" message="#[payload]"/>
+				</when>
+				<when expression='#[vars.Name startsWith "B"]'>
+					<ee:transform doc:name="Transform Message" doc:id="7da72ba8-304a-4071-9577-e6d2939c60dd">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	Name:payload.Name ++"2",
+	Email__c:payload.Email__c
+}	
+]
+]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<logger level="INFO" doc:name="Logger" doc:id="83f8ff1a-3a50-45da-b005-f2f72145bc6e" message="#[payload]"/>
+				</when>
+				<otherwise >
+					<ee:transform doc:name="Transform Message" doc:id="9b86b4ab-655f-48b2-b03b-d6f635e9dfcd" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	Name:payload.Name ++"3",
+	Email__c:payload.Email__c
+}	
+]
+]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<logger level="INFO" doc:name="Logger" doc:id="c48f0796-cadb-4bb9-91d7-58b4c0e8402e" message="#[payload]"/>
+				</otherwise>
+			</choice>
+			<salesforce:upsert type="Account" doc:name="Upsert" doc:id="b1f3b700-8b44-4bb1-93aa-2d8450622876" config-ref="Salesforce_Config" externalIdFieldName="Email__c" />
+			<ee:transform doc:name="Transform Message" doc:id="5db53436-6b1b-404b-bb69-59d85c8d6ed5" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="83f19ef0-c51b-4b32-8aa9-90b64dfd5134" message="#[payload]"/>
+		</foreach>
+    </flow>
+</mule>
