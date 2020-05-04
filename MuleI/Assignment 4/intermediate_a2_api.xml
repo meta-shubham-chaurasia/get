@@ -8,10 +8,10 @@
         <salesforce:cached-basic-connection username="shubham.chaurasia@metacube.com" password="1234@abcd" securityToken="w6WVKSaepLiBCfTMfZFWEqJR" />
     </salesforce:sfdc-config>
     <file:config name="File_Config" doc:name="File Config" doc:id="97713286-0d50-4c5b-ad8a-ead86df8dadd">
-        <file:connection workingDir="C:\Users\Shubham\AnypointStudio\studio-workspace\testscript\src\main\output" />
+        <file:connection workingDir="${mule.home}/apps/${app.name}/" />
     </file:config>
     <file:config name="File_Config1" doc:name="File Config" doc:id="1068de83-def4-489a-a4d0-b0af8e298963">
-        <file:connection workingDir="C:\Users\Shubham\AnypointStudio\studio-workspace\testscript\src\main\output" />
+        <file:connection workingDir="${mule.home}/apps/${app.name}/" />
     </file:config>
     <flow name="intermediate_a2_api-main">
         <http:listener config-ref="intermediate_a2_api-httpListenerConfig" path="/api/*">
@@ -151,7 +151,7 @@ payload]]></ee:set-payload>
         </foreach>
     </flow>
     <flow name="post:\customer:application\json:intermediate_a2_api-config">
-        <file:list doc:name="List" doc:id="6899b6b6-908d-4fd3-aa05-b3cd3f169cdd" config-ref="File_Config" directoryPath="C:\Users\Shubham\AnypointStudio\studio-workspace\testscript\src\main\output" />
+        <file:list doc:name="List" doc:id="6899b6b6-908d-4fd3-aa05-b3cd3f169cdd" config-ref="File_Config" directoryPath="${mule.home}/apps/${app.name}/" />
         <ee:transform doc:name="Transform Message" doc:id="07b33b18-072a-4d1a-a67a-c79d5360a7ac">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0

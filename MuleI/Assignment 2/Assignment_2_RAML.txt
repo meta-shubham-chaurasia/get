@@ -50,3 +50,24 @@ version: 1.0
           application/json:
             example:
               "Internal Server Error"
+  put:
+    displayName: Store Customer Details
+    responses:
+      404:
+        body:
+          application/json:
+            example:
+              "Not Found"
+      200:
+        body:
+          application/json:
+            example:
+              {
+                "First_Name":"F1",
+                "Last_Name":"L1"
+              }
+      500:
+        body:
+          application/json:
+            example:
+              "Internal Server Error"
