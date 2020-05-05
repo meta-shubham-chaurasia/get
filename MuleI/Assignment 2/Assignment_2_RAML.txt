@@ -52,7 +52,14 @@ version: 1.0
               "Internal Server Error"
   put:
     displayName: Store Customer Details
-    responses:
+	queryParameters:
+      First_Name:
+        required: true
+        example: "F1"
+	  Last_Name:
+        required: true
+        example: "l1"
+    responses
       404:
         body:
           application/json:
