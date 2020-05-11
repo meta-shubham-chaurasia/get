@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="f822988d-f9fc-42a0-959c-f0fe9fddc353" >
+		<http:listener-connection host="localhost" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="cf237d00-c058-4fc5-ac55-da7357100611" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="root" database="muleA" />
+	</db:config>
+	<flow name="advanceapp1Flow" doc:id="67eabde2-f0b4-4749-a690-7b7211ceb451" >
+		<http:listener doc:name="Listener" doc:id="6f2e6228-53d2-4adc-9b3b-5bfaaf990385" config-ref="HTTP_Listener_config" path="db/query1" allowedMethods="GET"/>
+		<db:select doc:name="Select" doc:id="0ec8a331-9a5e-42be-8ef9-0d59b6971231" config-ref="Database_Config">
+			<db:sql >select name from muleTable;</db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="ad74577a-43d1-4313-96c1-90f90393a4a4">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="390d8197-5668-41c2-b00e-7d9ece127e87" message="#[payload]"/>
+	</flow>
+</mule>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd">
+	<wsc:config name="Web_Service_Consumer_Config" doc:name="Web Service Consumer Config" doc:id="c6f6c968-2ec4-4f38-a755-bdbaa8a082ba" >
+		<wsc:connection service="Add" port="AddSOAP" address="http://localhost:8081/Add/AddSOAP/" wsdlLocation="api\add.wsdl">
+			<wsc:web-service-security actor="http://schemas.xmlsoap.org/soap/actor/next" />
+		</wsc:connection>
+	</wsc:config>
+	<flow name="advanceapp3consumeFlow" doc:id="1eb93602-4935-4dc4-b6f6-c2820ec8c6a1" >
+		<http:listener doc:name="Listener" doc:id="4eb72a8a-1dfd-4e43-bd78-d634a31fed94" config-ref="api-httpListenerConfig" path="/api"/>
+		<set-variable value="#[payload.input1]" doc:name="Set Variable" doc:id="1fc01745-891a-4b84-81bd-cfb4d89a97c0" variableName="var1"/>
+		<set-variable value="#[payload.input2]" doc:name="Set Variable" doc:id="a4184df9-b4a0-4981-863f-8be37a1136e9" variableName="var2"/>
+		<ee:transform doc:name="Transform Message" doc:id="a6efd2b4-36ae-4061-9246-d99a79408b71" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://www.example.org/Add/
+---
+{
+	ns0#NewOperation: {
+		input1: vars.var1 ,
+		input2: vars.var2
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<wsc:consume doc:name="Consume" doc:id="1ff219a9-7dab-47c8-a84c-670c35d3552c" config-ref="Web_Service_Consumer_Config" operation="NewOperation"/>
+		<ee:transform doc:name="Transform Message" doc:id="a2dfcabb-a4b7-4ed9-ac66-1593b2cd4e6a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+---
+{
+	result:payload.body
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="66a7a4bf-74f3-4776-b974-8b6f0ff10eef" message="#[payload]"/>
+	</flow>
+</mule>

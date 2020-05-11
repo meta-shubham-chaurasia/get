@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="12152ef3-df97-4a1c-958e-6c9bb376a3b1" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="root" database="muleA" />
+	</db:config>
+	<os:object-store name="Object_store" doc:name="Object store" doc:id="d521a998-5d34-412d-91b4-05e6f46fbd8e" />
+	<os:object-store name="watermarkStore" doc:name="Object store" doc:id="66acce03-dd23-4bd6-b803-14ff1dbf3801" />
+	<os:object-store name="Object_store1" doc:name="Object store" doc:id="ed357b42-a324-4613-ba7a-14cb34c44586" />
+	<os:object-store name="Object_store2" doc:name="Object store" doc:id="4719ed16-0d24-4853-ac13-a8a119a4208a" />
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="e9d0160f-c65c-4ec7-8ba6-c8cbcc7c1d05" >
+		<salesforce:cached-basic-connection username="shubham.chaurasia@metacube.com" password="1234@abcd" securityToken="0VI6ac4s5uYqb8CrszwiCJ5o" />
+	</salesforce:sfdc-config>
+	<flow name="advanceapp2Flow" doc:id="5e4fe62a-d89c-4b56-bcf8-f59889734e29" >
+		<scheduler doc:name="Scheduler" doc:id="b57eb201-e41e-403a-b1b4-d6b92575e6c4" >
+			<scheduling-strategy >
+				<cron expression="0 * * ? * *" timeZone="Asia/India"/>
+			</scheduling-strategy>
+		</scheduler>
+		<set-variable value='#[%dw 2.0
+---
+watermark:(now() - |PT1H|)as String {format: "yyyy-MM-dd h:m:s"}]' doc:name="Set Variable" doc:id="e5288511-39c2-40e3-a158-adaa6db9b452" variableName="watermark"/>
+		<logger level="INFO" doc:name="Logger" doc:id="48c1697c-8247-47f5-bd07-16a9e24d54f4" message="#[vars.watermark]"/>
+		<db:select doc:name="Select" doc:id="74dd9214-6b55-4503-8a08-6e49880609cf" config-ref="Database_Config">
+			<db:sql>Select Name,Phone,Email,lastmodifiedbydate from muleTable1 WHERE lastmodifiedbydate &gt;:watermark</db:sql>
+			<db:input-parameters ><![CDATA[#[vars.watermark]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="dd0b34fe-3d36-4fe1-a947-66d826b00085">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="7b70769b-45e6-4b62-a1e4-bcaad09c1e3f">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+payload map(items,index)->{
+		("Name":items.Name),
+	("Phone":items.Phone),
+	("Email__c":items.Email)
+	}
+	
+	
+
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:upsert doc:name="Upsert" doc:id="e0de20d8-f2be-4427-865b-e2a0f8cfd7e8" config-ref="Salesforce_Config" externalIdFieldName="Email__c" type="Account"/>
+		<ee:transform doc:name="Transform Message" doc:id="4b319a46-9802-4242-8a0a-45fb3c4c7065">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map(items,object)->{
+	"id":items.id
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="d9736c67-9e67-40e2-9a2c-09e48271742f" message="#[%dw 2.0
+output application/json
+---
+&quot;id-&quot;:payload.*id joinBy ',']"/>
+	</flow>
+</mule>
