@@ -13,7 +13,9 @@ http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/
 		</wsc:connection>
 	</wsc:config>
 	<flow name="advanceapp3consumeFlow" doc:id="1eb93602-4935-4dc4-b6f6-c2820ec8c6a1" >
-		<http:listener doc:name="Listener" doc:id="4eb72a8a-1dfd-4e43-bd78-d634a31fed94" config-ref="api-httpListenerConfig" path="/api"/>
+		<http:listener doc:name="Listener" doc:id="4eb72a8a-1dfd-4e43-bd78-d634a31fed94" config-ref="api-httpListenerConfig" path="/api">
+			<http:error-response statusCode="#[vars.httpStatusCode]" />
+		</http:listener>
 		<set-variable value="#[payload.input1]" doc:name="Set Variable" doc:id="1fc01745-891a-4b84-81bd-cfb4d89a97c0" variableName="var1"/>
 		<set-variable value="#[payload.input2]" doc:name="Set Variable" doc:id="a4184df9-b4a0-4981-863f-8be37a1136e9" variableName="var2"/>
 		<ee:transform doc:name="Transform Message" doc:id="a6efd2b4-36ae-4061-9246-d99a79408b71" >
@@ -30,7 +32,27 @@ ns ns0 http://www.example.org/Add/
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<wsc:consume doc:name="Consume" doc:id="1ff219a9-7dab-47c8-a84c-670c35d3552c" config-ref="Web_Service_Consumer_Config" operation="NewOperation"/>
+		<try doc:name="Try" doc:id="280b6b31-69da-486e-8614-3aad924ffa07" >
+			<wsc:consume doc:name="Consume" doc:id="1ff219a9-7dab-47c8-a84c-670c35d3552c" config-ref="Web_Service_Consumer_Config" operation="NewOperation" />
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="8f6a9599-358c-4c01-aae8-92eedef396cf" type="HTTP:, WSC:BAD_REQUEST, WSC:BAD_RESPONSE" when="#[error.errorType.namespace =='HTTP']">
+					<ee:transform doc:name="Transform Message" doc:id="a12dcf54-c2b1-4df9-9609-656d22e7e54f" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"message":error.description
+}]]></ee:set-payload>
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="httpStatusCode" ><![CDATA[500]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<logger level="INFO" doc:name="Logger" doc:id="dbf9fad1-3920-4831-9ec0-fb5ed6d71b98" message="#[payload.message]"/>
+				</on-error-continue>
+			</error-handler>
+		</try>
 		<ee:transform doc:name="Transform Message" doc:id="a2dfcabb-a4b7-4ed9-ac66-1593b2cd4e6a" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -42,5 +64,23 @@ output application/xml
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="66a7a4bf-74f3-4776-b974-8b6f0ff10eef" message="#[payload]"/>
-	</flow>
+		<error-handler>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="f61a0539-5eb3-4f09-a339-bccc8f3fd4ee" type="ANY">
+				<ee:transform doc:name="Transform Message" doc:id="f5698ebe-2c1a-474e-8bd3-c0ae6a265df9" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"message":error.description
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatusCode" ><![CDATA[404]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	
+</flow>
 </mule>

@@ -7,12 +7,11 @@
     <flow name="api-main">
         <http:listener config-ref="api-httpListenerConfig" path="/Add/AddSOAP">
             <http:response statusCode="#[attributes.protocolHeaders.httpStatus default 200]">
-                <http:body>#[payload]</http:body>
-                <http:headers>#[attributes.protocolHeaders default {}]</http:headers>
+                <http:headers><![CDATA[#[attributes.protocolHeaders default {}]]]></http:headers>
             </http:response>
-            <http:error-response statusCode="#[attributes.protocolHeaders.httpStatus default 500]">
-                <http:body>#[payload]</http:body>
-                <http:headers>#[attributes.protocolHeaders default {}]</http:headers>
+            <http:error-response statusCode="#[vars.httpStatusCode default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[attributes.protocolHeaders default {}]]]></http:headers>
             </http:error-response>
         </http:listener>
         <apikit-soap:router config-ref="soapkit-config">
@@ -27,6 +26,23 @@
                   queryString: attributes.queryString
             }]</apikit-soap:attributes>
         </apikit-soap:router>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="62e8a7d2-56aa-44e8-9b60-69e5bab4c483" type="HTTP:NOT_FOUND" when="#[error.errorType.namespace=='HTTP']">
+				<ee:transform doc:name="Transform Message" doc:id="2e7e5d9e-2ef7-4f07-b38a-79df8c9c5d49" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"message":error.description
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatusCode" ><![CDATA[404]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-continue>
+		</error-handler>
     </flow>
     <flow name="NewOperation:\soapkit-config">
 		<ee:transform>
@@ -44,5 +60,19 @@ ns ns0 http://www.example.org/Add/
 }]]></ee:set-payload>
             </ee:message>
         </ee:transform>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d8889995-99f1-45f3-a455-b2ba22fc0c62" type="ANY">
+				<ee:transform doc:name="Transform Message" doc:id="c128ff70-2b98-4d3d-9874-f597fe510905" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"message":error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
     </flow>
 </mule>
