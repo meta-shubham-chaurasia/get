@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit-soap="http://www.mulesoft.org/schema/mule/apikit-soap" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/apikit-soap http://www.mulesoft.org/schema/mule/apikit-soap/current/mule-apikit-soap.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit-soap="http://www.mulesoft.org/schema/mule/apikit-soap" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/apikit-soap http://www.mulesoft.org/schema/mule/apikit-soap/current/mule-apikit-soap.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
     <http:listener-config name="api-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081"/>
     </http:listener-config>
     <apikit-soap:config httpStatusVarName="httpStatus" name="soapkit-config" port="AddSOAP" service="Add" wsdlLocation="add.wsdl"/>
-    <flow name="api-main">
+    <db:config name="Database_Config" doc:name="Database Config" doc:id="c655a04d-8196-4247-a814-dd0a82b5f10d" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="root" database="muleA" />
+	</db:config>
+	<flow name="api-main">
         <http:listener config-ref="api-httpListenerConfig" path="/Add/AddSOAP">
             <http:response statusCode="#[attributes.protocolHeaders.httpStatus default 200]">
                 <http:headers><![CDATA[#[attributes.protocolHeaders default {}]]]></http:headers>
@@ -59,7 +63,24 @@ ns ns0 http://www.example.org/Add/
 	} write "application/xml"
 }]]></ee:set-payload>
             </ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="sum" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"sum":(payload.body.NewOperation.input1
+default 0) + (payload.body.NewOperation.input2 default 0)
+}]]></ee:set-variable>
+			</ee:variables>
         </ee:transform>
+		<db:insert doc:name="Insert" doc:id="9a2145be-0f32-4b8d-b6c1-78907b1cdcad" config-ref="Database_Config">
+			<db:sql >insert into muleTable4 (sum) values(:sum)</db:sql>
+			<db:input-parameters ><![CDATA[#[%dw 2.0
+---
+{
+	sum:vars.sum
+}]]]></db:input-parameters>
+		</db:insert>
 		<error-handler >
 			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d8889995-99f1-45f3-a455-b2ba22fc0c62" type="ANY">
 				<ee:transform doc:name="Transform Message" doc:id="c128ff70-2b98-4d3d-9874-f597fe510905" >
