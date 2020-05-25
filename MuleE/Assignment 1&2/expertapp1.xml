@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="80713423-22c7-4585-95eb-0ea36a29daa8" >
+		<http:listener-connection host="localhost" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="0f27d037-8e9c-4b07-a78b-36d8fb0b7869" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="root" database="MuleE" />
+	</db:config>
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="1cdd2801-499e-4dc7-9cb3-31ce81e61ed7" >
+		<salesforce:cached-basic-connection username="shubham.chaurasia@metacube.com" password="1234@abcd" securityToken="0VI6ac4s5uYqb8CrszwiCJ5o" />
+	</salesforce:sfdc-config>
+	<flow name="expertapp1Flow" doc:id="5ca37811-af61-4427-911f-2364d9257e17" >
+		<http:listener doc:name="Listener" doc:id="004b790d-7b57-4e84-a23a-ae78a998ac91" config-ref="HTTP_Listener_config" path="/accounts"/>
+		<db:select doc:name="Select" doc:id="c7573483-1010-4f0d-8a47-7548b14e9ec0" config-ref="Database_Config">
+						<db:sql>Select name,email from MuleE1</db:sql>
+					</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="0e74a785-74bd-4bc7-bed5-459df0294b6c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<batch:job jobName="expertapp1Batch_Job" doc:id="da66d959-e1a6-4ff7-b278-4d81d762f560" target="payload">
+			<batch:process-records >
+				<batch:step name="Batch_Step" doc:id="b3f1724a-22db-4379-bd49-3d3db64e65fe" >
+					<salesforce:query doc:name="Query" doc:id="d16084cc-6ddb-48cb-81be-c3b9bc634cbd" config-ref="Salesforce_Config" target="payload01">
+						<salesforce:salesforce-query>SELECT Id from Account where email__c=':email'</salesforce:salesforce-query>
+						<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	email : payload.email
+}]]]></salesforce:parameters>
+					</salesforce:query>
+					<logger level="INFO" doc:name="Logger" doc:id="9a84711d-6c33-4857-9957-2a36b27ac885" message="#[vars.payload01.Id]"/>
+				</batch:step>
+				<batch:step name="Batch_Step2" doc:id="e6b10bca-9d18-4618-9a07-3c5563e19a3b" >
+					<choice doc:name="Choice" doc:id="dcc4a4bc-24b8-4e48-a171-650829284d0d" >
+						<when expression='#[vars.payload01.Id==null]'>
+							<ee:transform doc:name="Transform Message" doc:id="3a8cb459-e08b-4cd6-acf3-895df8d7cc49">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	Name: payload.name,
+	Email__c: payload.email
+	
+}]]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+							<salesforce:upsert doc:name="Upsert" doc:id="b5d92982-cc9d-4383-b7b3-fda9bc966f48" config-ref="Salesforce_Config" externalIdFieldName="Email__c" type="Account" />
+							<ee:transform doc:name="Transform Message" doc:id="8b624d54-9085-4706-bd68-d923fc9f9b02" >
+								<ee:message >
+									<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+								</ee:message>
+							</ee:transform>
+						</when>
+						<otherwise >
+							<ee:transform doc:name="Transform Message" doc:id="77d90c22-aca9-47fa-8a75-b3f8c8894b6b">
+								<ee:message>
+									<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+vars.payload01 map ( payload01 , indexOfPayload01 ) -> {
+	Id: payload01.Id,
+	Name: payload.name,
+	Email__c: payload.email
+}]]></ee:set-payload>
+								</ee:message>
+							</ee:transform>
+							<salesforce:upsert doc:name="Upsert" doc:id="ad1aa007-d27c-4dab-9702-7b2bb47d63fd" config-ref="Salesforce_Config" externalIdFieldName="id" type="Account"/>
+							<ee:transform doc:name="Transform Message" doc:id="e7328da4-cfac-4e69-a680-2e6d1bdd6195" >
+								<ee:message >
+									<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+								</ee:message>
+							</ee:transform>
+						</otherwise>
+					</choice>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<logger level="INFO" doc:name="Logger" doc:id="b5831750-7659-40e1-81b5-59f4a2c9779b" message="process completed"/>
+			</batch:on-complete>
+		</batch:job>
+	</flow>
+</mule>
